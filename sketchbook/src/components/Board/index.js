@@ -12,7 +12,23 @@ const Board =()=>{
 
     const {color,size} = useSelector(state => state.toolbox[activeMenuItem])
 
-    //called only once
+    useEffect(()=>{
+        if(!canvasRef.current) return
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+        // to change brush and color change
+        const changeConfig=()=>{
+            context.strokeStyle = color;
+            context.lineWidth = size;
+        }
+
+      
+       
+        changeConfig();
+
+    },[color,size])
+
+    //called only once for mounting
     useEffect(()=>{
         if(!canvasRef.current) return
         const canvas = canvasRef.current;
@@ -21,6 +37,35 @@ const Board =()=>{
         //when mounting
         canvas.width = window.innerWidth
         canvas.height = window.innerHeight
+
+          //add event listner to draw
+
+          const handleMouseDown = (e) =>{
+
+            
+          }
+  
+          const handleMouseMove = (e) =>{
+
+            
+  
+          }
+  
+          const handleMouseUp = (e) =>{
+  
+          }
+  
+          canvas.addEventListener('mousedown',handleMouseDown)
+          canvas.addEventListener('mousemove',handleMouseMove)
+          canvas.addEventListener('mouseup',handleMouseUp)
+
+          return ()=>{
+            canvas.removeEventListener('mousedown',handleMouseDown)
+            canvas.removeEventListener('mousemove',handleMouseMove)
+            canvas.removeEventListener('mouseup',handleMouseUp)
+          }
+  
+  
     },[])
 
     console.log(color,size)

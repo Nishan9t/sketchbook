@@ -1,3 +1,5 @@
+import { MENU_ITEMS } from "@/constants";
+import { actionItemClick } from "@/slice/menuSlice";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { useSelector,useDispatch } from "react-redux";
@@ -5,14 +7,37 @@ import { useSelector,useDispatch } from "react-redux";
 
 const Board =()=>{
 
+    const dispatch=useDispatch();
+
 
     const canvasRef = useRef(null)
     //to draw
     const shouldDraw = useRef(false)
 
-    const activeMenuItem = useSelector(state => state.menu.activeMenuItem)
+    const {activeMenuItem,actionMenuItem} = useSelector(state => state.menu)
 
     const {color,size} = useSelector(state => state.toolbox[activeMenuItem])
+
+
+    useEffect(()=>{
+        if(!canvasRef.current) return
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+
+        if(actionMenuItem === MENU_ITEMS.DOWNLOAD)
+        {
+            //create image url
+            const URL = canvas.toDataURL();
+            //now we have to give this URL to anchor tag and download from it
+            const anchor = document.createElement("a");
+            anchor.href=URL
+            anchor.download ='sketch.png'
+            anchor.click();
+        }
+        //so that we can download the canvas each time we click on same canvas
+        dispatch(actionItemClick(null))
+
+    },[actionMenuItem])
 
     useEffect(()=>{
         if(!canvasRef.current) return
@@ -43,13 +68,23 @@ const Board =()=>{
 
           //add event listner to draw
 
+          const beginPath =(x,y)=>{
+             //saying canvas to get ready and it needed moveTo to tell from where start moving
+             context.beginPath()
+              //we are going start from X , Y
+            context.moveTo(x,y)
+
+          }
+
+          const drawLine=(x,y)=>{
+            context.lineTo(x,y)
+            context.stroke();
+          }
+
           const handleMouseDown = (e) =>{
 
             shouldDraw.current = true;
-            //saying canvas to get ready and it needed moveTo to tell from where start moving
-            context.beginPath()
-            //we are going start from X , Y
-            context.moveTo(e.clientX,e.clientY)
+            beginPath(e.clientX,e.clientY)
             
           }
   
@@ -60,10 +95,8 @@ const Board =()=>{
                 return
             }
             //to draw
-            context.lineTo(e.clientX,e.clientY)
-            context.stroke();
+            drawLine(e.clientX, e.clientY);
             
-  
           }
   
           const handleMouseUp = (e) =>{

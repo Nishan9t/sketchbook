@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { useSelector,useDispatch } from "react-redux";
 
@@ -7,6 +7,8 @@ const Board =()=>{
 
 
     const canvasRef = useRef(null)
+    //to draw
+    const shouldDraw = useRef(false)
 
     const activeMenuItem = useSelector(state => state.menu.activeMenuItem)
 
@@ -29,7 +31,8 @@ const Board =()=>{
     },[color,size])
 
     //called only once for mounting
-    useEffect(()=>{
+    //change this useEffect to useLayoutEffect so that is renders before useEffect
+    useLayoutEffect(()=>{
         if(!canvasRef.current) return
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -42,17 +45,29 @@ const Board =()=>{
 
           const handleMouseDown = (e) =>{
 
+            shouldDraw.current = true;
+            //saying canvas to get ready and it needed moveTo to tell from where start moving
+            context.beginPath()
+            //we are going start from X , Y
+            context.moveTo(e.clientX,e.clientY)
             
           }
   
           const handleMouseMove = (e) =>{
-
+            //if mouse is not pressed
+            if(!shouldDraw.current)
+            {
+                return
+            }
+            //to draw
+            context.lineTo(e.clientX,e.clientY)
+            context.stroke();
             
   
           }
   
           const handleMouseUp = (e) =>{
-  
+            shouldDraw.current=false;
           }
   
           canvas.addEventListener('mousedown',handleMouseDown)

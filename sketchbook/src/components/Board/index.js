@@ -14,6 +14,10 @@ const Board =()=>{
     //to draw
     const shouldDraw = useRef(false)
 
+    //to store previous slides/canvas
+    const drawHistory = useRef([])
+    const historyPointer = useRef(0)
+
     const {activeMenuItem,actionMenuItem} = useSelector(state => state.menu)
 
     const {color,size} = useSelector(state => state.toolbox[activeMenuItem])
@@ -33,6 +37,21 @@ const Board =()=>{
             anchor.href=URL
             anchor.download ='sketch.png'
             anchor.click();
+        } 
+        else if(actionMenuItem === MENU_ITEMS.UNDO || actionMenuItem === MENU_ITEMS.REDO)
+        {
+          if(historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO)
+          {
+            historyPointer.current -= 1;
+          }
+          if(historyPointer.current < drawHistory.current.length-1 && actionMenuItem === MENU_ITEMS.REDO)
+          {
+            historyPointer.current += 1;
+          }
+          const imageData = drawHistory.current[historyPointer.current];
+          context.putImageData(imageData,0,0);
+          
+
         }
         //so that we can download the canvas each time we click on same canvas
         dispatch(actionItemClick(null))
@@ -48,9 +67,7 @@ const Board =()=>{
             context.strokeStyle = color;
             context.lineWidth = size;
         }
-
-      
-       
+     
         changeConfig();
 
     },[color,size])
@@ -66,7 +83,7 @@ const Board =()=>{
         canvas.width = window.innerWidth
         canvas.height = window.innerHeight
 
-          //add event listner to draw
+          //add event listener to draw
 
           const beginPath =(x,y)=>{
              //saying canvas to get ready and it needed moveTo to tell from where start moving
@@ -101,6 +118,11 @@ const Board =()=>{
   
           const handleMouseUp = (e) =>{
             shouldDraw.current=false;
+            //push the current state of canvas in array for undo
+            const imageData = context.getImageData(0,0,canvas.width,canvas.height)
+            drawHistory.current.push(imageData)
+            //history pointer contains the latest change
+            historyPointer.current = drawHistory.current.length-1;
           }
   
           canvas.addEventListener('mousedown',handleMouseDown)

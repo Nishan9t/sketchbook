@@ -4,13 +4,16 @@ const { Server } = require("socket.io");
 const cors = require('cors')
 
 const app = express();
+
+const isDev = app.settings.env === 'development'
+const URL = isDev ? 'http://localhost:3000' :"https://sketchbook-eta.vercel.app";
+
 app.use(cors({
-  origin:'http://localhost:3000'
+  origin:URL
 }))
 const httpServer = createServer(app);
 
-const isDev = app.settings.env === 'development'
-const URL = isDev ? 'http://localhost:3000' :"";
+
 
 const io = new Server(httpServer, { cors: URL  });
 

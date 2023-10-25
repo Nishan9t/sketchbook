@@ -8,7 +8,11 @@ app.use(cors({
   origin:'http://localhost:3000'
 }))
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: 'http://localhost:3000' });
+
+const isDev = app.settings.env === 'development'
+const URL = isDev ? 'http://localhost:3000' :"";
+
+const io = new Server(httpServer, { cors: URL  });
 
 io.on("connection", (socket) => {
   console.log('server connected')

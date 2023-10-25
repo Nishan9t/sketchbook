@@ -6,6 +6,8 @@ import cx from 'classnames';
 import {COLORS, MENU_ITEMS} from '@/constants'
 import { changeColor,changeBrushSize} from '@/slice/toolboxSlice';
 
+import { socket } from "@/socket";
+
 const Toolbox=()=>{
 
     const dispatch = useDispatch();
@@ -21,11 +23,15 @@ const Toolbox=()=>{
 
     const updateBrushSize=(e)=>{
         dispatch(changeBrushSize({item:activeMenuItem , size:e.target.value}))
+        //we must emit the change to all others clients
+        socket.emit('changeConfig',{color,size:e.target.value})
 
     }
 
     const updateColor=(newColor)=>{
         dispatch(changeColor({item:activeMenuItem , color:newColor}))
+        //we must emit the change to all others clients
+        socket.emit('changeConfig',{color:newColor,size})
     }
 
 
